@@ -1,16 +1,17 @@
 import promptSync from 'prompt-sync';
 const prompt = promptSync({ sigint: true });
 
-function getEmptyBoard(n) {
+function getEmptyBoard(N) {
     let emptyarray = [];
-    for (let i = 0; i < n; i++) {
+    for (let i = 0; i < N; i++) {
         emptyarray.push([]);
-        for (let j = 0; j < n; j++) {
+        for (let j = 0; j < N; j++) {
             emptyarray[i][j] = ".";
         }
     }
     return emptyarray;
 }
+
 function isBoardFull(board) {
     for (const row of board) {
         if (row.includes(".")) {
@@ -19,46 +20,92 @@ function isBoardFull(board) {
     }
     return true;
 }
-function checkIsSomebodyWon(board, boardN, howLongWantToCheck, mark) {
-    let isWin = false;
 
+function checkSubMatrixIsWon(board, n, mark, matrixRowShift, matrixColShift) {
     // Check rows and columns
-    for (let i = 0; i < boardN; i++) {
+    for (let i = 0; i < n; i++) {
         let rowMarkCount = 0;
         let colMarkCount = 0;
-        for (let j = 0; j < boardN; j++) {
-            if (board[i][j] == mark) {  // Rows
+        for (let j = 0; j < n; j++) {
+            if (board[i + matrixRowShift][j + matrixColShift] == mark) {  // Rows
                 rowMarkCount++;
             }
-            if (board[j][i] == mark) {  // Columns
+            if (board[j + matrixRowShift][i + matrixColShift] == mark) {  // Columns
                 colMarkCount++;
             }
         }
-        if (rowMarkCount == howLongWantToCheck || colMarkCount == howLongWantToCheck) {
+        if (rowMarkCount == n || colMarkCount == n) {
             return true;
         }
     }
 
-    // Check main diagonals (only if howLongWantToCheck == boardN)
-
-    if (howLongWantToCheck === boardN) {
-        let diagFirstCount = 0;
-        let diagSecondCount = 0;
-        for (let i = 0; i < boardN; i++) {
-            if (board[i][i] == mark) { // Main diagonal: top-left to bottom-right
-                diagFirstCount++;
-            }
-            if (board[i][boardN - i - 1] == mark) { // Main diagonal: top-right to bottom-left
-                diagSecondCount++;
-            }
+    let diagFirstCount = 0;
+    let diagSecondCount = 0;
+    for (let i = 0; i < n; i++) {
+        if (board[i + matrixRowShift][i + matrixColShift] == mark) {
+            diagFirstCount++;
         }
-        if (diagFirstCount == howLongWantToCheck || diagSecondCount == howLongWantToCheck) {
-            return true;
+        if (board[i + matrixRowShift][n - i - 1 + matrixColShift] == mark) {
+            diagSecondCount++;
         }
     }
-    return isWin;
+    if (diagFirstCount == n || diagSecondCount == n) {
+        return true;
+    }
+    return false;
 }
-function diagcycles(board, boardN, howLongWantToCheck, mark, shift, direction) {
+
+function checkBoardIsWon(board, N, n, mark){
+    let maxRowShift=N-n+1;
+    let maxColShift=N-n+1;
+    for (let i = 0; i < maxRowShift; i++) {
+        for (let j = 0; j < maxColShift; j++) {
+            if (checkSubMatrixIsWon(board, n, mark, i, j)){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+function aiCoordsInSubMatrix(board, n, mark, isRowCheck, matrixRowShift, matrixColShift){
+
+        let canWinCoord;
+        let choosenParams = false;
+
+        for (let i = 0; i < n; i++) {
+            let markCount = 0;
+            let emptyCount = 0;
+            for (let j = 0; j < n; j++) {
+                if (isRowCheck === false) {
+                    let randomVariable = i;
+                    i = j;
+                    j = randomVariable;
+                }
+                if (board[i+matrixRowShift][j+matrixColShift] == mark) {
+                    markCount++;
+                } else if (board[i+matrixRowShift][j+matrixColShift] == ".") {
+                    emptyCount++;
+                    canWinCoord = [i+matrixRowShift, j+matrixColShift];
+                }
+            }
+            if (markCount === n - 1 && emptyCount === 1) {
+                choosenParams = canWinCoord;
+                return choosenParams;
+            }
+        }
+        return false;
+}
+
+console.log(aiCoordsInSubMatrix([
+    [".", ".", "."],
+    [".", "O", "O"],
+    [".", ".", "O"]], 3,"O", false, 0, 0));
+
+
+/*
+
+function diagcycles(board, boardN, howLongWantToCheck, mark, shiftToDiag2, direction) {
 
     let markCount = 0;
     let emptyCount = 0;
@@ -66,11 +113,11 @@ function diagcycles(board, boardN, howLongWantToCheck, mark, shift, direction) {
     let choosenParams = false;
 
     for (let i = 0; i < boardN; i++) {
-        if (board[i][i * direction + shift] === mark) { // Main diagonal: top-left to bottom-right
+        if (board[i][i * direction + shiftToDiag2] === mark) { // Main diagonal: top-left to bottom-right
             markCount++;
-        } else if (board[i][i * direction + shift] === '.') {
+        } else if (board[i][i * direction + shiftToDiag2] === '.') {
             emptyCount++;
-            canWinCoord = [i, i * direction + shift];
+            canWinCoord = [i, i * direction + shiftToDiag2];
         }
     }
 
@@ -143,7 +190,8 @@ console.log(getCleverParams([
     [".", ".", "O", "O"],
     [".", "O", "O", "."],
     [".", "O", "O", "O"],
-    [".", ".", "O", "."]], 4, 4, "O"));
+    [".", ".", "O", "."]], 4, 4, "O")); */ 
+    
 
 
 
