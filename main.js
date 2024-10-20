@@ -63,7 +63,7 @@ function diagcycles(board, boardN, howLongWantToCheck, mark, shift, direction) {
     let markCount = 0;
     let emptyCount = 0;
     let canWinCoord;
-    let choosenParams=false;
+    let choosenParams = false;
 
     for (let i = 0; i < boardN; i++) {
         if (board[i][i * direction + shift] === mark) { // Main diagonal: top-left to bottom-right
@@ -82,7 +82,7 @@ function diagcycles(board, boardN, howLongWantToCheck, mark, shift, direction) {
 }
 function rowAndColcycles(board, boardN, howLongWantToCheck, mark, rowOrCol) {
     let canWinCoord;
-    let choosenParams= false;
+    let choosenParams = false;
     for (let i = 0; i < boardN; i++) {
         let markCount = 0;
         let emptyCount = 0;
@@ -113,36 +113,37 @@ function getCleverParams(board, boardN, howLongWantToCheck, mark) {
     let winRow = rowAndColcycles(board, boardN, howLongWantToCheck, mark, true);
     let winCol = rowAndColcycles(board, boardN, howLongWantToCheck, mark, false);
 
-    let listOfGoodChoises=[windiag1, windiag2, winRow, winCol];
+    let listOfGoodChoises = [windiag1, windiag2, winRow, winCol];
 
     for (const element of listOfGoodChoises) {
         if (element !== false) {
             return element;
-        }        
+        }
     }
 
     return "nope";
 }
 
 console.log(getCleverParams([
-["O", "O", "."],
-[".", "O", "."],
-[".", "O", "."]], 3, 3, "O"));
+    ["O", "O", "."],
+    [".", "O", "."],
+    [".", "O", "."]], 3, 3, "O"));
 
 console.log(getCleverParams([
-["O", ".", "O"],
-[".", ".", "."],
-[".", ".", "."]], 3, 3, "O"));
+    ["O", ".", "O"],
+    [".", ".", "."],
+    [".", ".", "."]], 3, 3, "O"));
 
 console.log(getCleverParams([
-["O", ".", "."],
-[".", "O", "."],
-[".", "O", "O"]], 3, 3, "O"));
+    ["O", ".", "."],
+    [".", "O", "."],
+    [".", "O", "O"]], 3, 3, "O"));
 
 console.log(getCleverParams([
-[".", ".", "O"], 
-[".", "O", "O"], 
-[".", ".", "O"]], 3, 3, "O"));
+    [".", ".", "O", "O"],
+    [".", "O", "O", "."],
+    [".", "O", "O", "O"],
+    [".", ".", "O", "."]], 4, 4, "O"));
 
 
 
