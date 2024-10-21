@@ -55,12 +55,12 @@ function checkSubMatrixIsWon(board, n, mark, matrixRowShift, matrixColShift) {
     return false;
 }
 
-function checkBoardIsWon(board, N, n, mark){
-    let maxRowShift=N-n+1;
-    let maxColShift=N-n+1;
+function checkBoardIsWon(board, N, n, mark) {
+    let maxRowShift = N - n + 1;
+    let maxColShift = N - n + 1;
     for (let i = 0; i < maxRowShift; i++) {
         for (let j = 0; j < maxColShift; j++) {
-            if (checkSubMatrixIsWon(board, n, mark, i, j)){
+            if (checkSubMatrixIsWon(board, n, mark, i, j)) {
                 return true;
             }
         }
@@ -68,130 +68,73 @@ function checkBoardIsWon(board, N, n, mark){
     return false;
 }
 
-function aiCoordsInSubMatrix(board, n, mark, isRowCheck, matrixRowShift, matrixColShift){
+function aiCoordsInSubMatrix(board, n, mark, isRowCheck, matrixRowShift, matrixColShift) {
 
-        let canWinCoord;
-        let choosenParams = false;
-
-        for (let i = 0; i < n; i++) {
-            let markCount = 0;
-            let emptyCount = 0;
-            for (let j = 0; j < n; j++) {
-                if (isRowCheck === false) {
-                    let randomVariable = i;
-                    i = j;
-                    j = randomVariable;
-                }
-                if (board[i+matrixRowShift][j+matrixColShift] == mark) {
-                    markCount++;
-                } else if (board[i+matrixRowShift][j+matrixColShift] == ".") {
-                    emptyCount++;
-                    canWinCoord = [i+matrixRowShift, j+matrixColShift];
-                }
-            }
-            if (markCount === n - 1 && emptyCount === 1) {
-                choosenParams = canWinCoord;
-                return choosenParams;
-            }
-        }
-        return false;
-}
-
-console.log(aiCoordsInSubMatrix([
-    [".", ".", "."],
-    [".", "O", "O"],
-    [".", ".", "O"]], 3,"O", false, 0, 0));
-
-
-/*
-
-function diagcycles(board, boardN, howLongWantToCheck, mark, shiftToDiag2, direction) {
-
-    let markCount = 0;
-    let emptyCount = 0;
     let canWinCoord;
     let choosenParams = false;
 
-    for (let i = 0; i < boardN; i++) {
-        if (board[i][i * direction + shiftToDiag2] === mark) { // Main diagonal: top-left to bottom-right
-            markCount++;
-        } else if (board[i][i * direction + shiftToDiag2] === '.') {
-            emptyCount++;
-            canWinCoord = [i, i * direction + shiftToDiag2];
-        }
-    }
-
-    if (markCount === howLongWantToCheck - 1 && emptyCount === 1) {
-        choosenParams = canWinCoord;
-    }
-    return choosenParams;
-
-}
-function rowAndColcycles(board, boardN, howLongWantToCheck, mark, rowOrCol) {
-    let canWinCoord;
-    let choosenParams = false;
-    for (let i = 0; i < boardN; i++) {
+    for (let i = 0; i < n; i++) {
         let markCount = 0;
         let emptyCount = 0;
-        for (let j = 0; j < boardN; j++) {
-            if (rowOrCol === false) {
+        for (let j = 0; j < n; j++) {
+            if (isRowCheck === false) {
                 let randomVariable = i;
                 i = j;
                 j = randomVariable;
             }
-            if (board[i][j] == mark) {
+            if (board[i + matrixRowShift][j + matrixColShift] == mark) {
                 markCount++;
-            } else if (board[i][j] == ".") {
+            } else if (board[i + matrixRowShift][j + matrixColShift] == ".") {
                 emptyCount++;
-                canWinCoord = [i, j];
+                canWinCoord = [i + matrixRowShift, j + matrixColShift];
             }
         }
-        if (markCount === howLongWantToCheck - 1 && emptyCount === 1) {
+        if (markCount === n - 1 && emptyCount === 1) {
             choosenParams = canWinCoord;
+            return choosenParams;
         }
     }
-    return choosenParams;
+    return false;
 }
 
-function getCleverParams(board, boardN, howLongWantToCheck, mark) {
-
-    let windiag1 = diagcycles(board, boardN, howLongWantToCheck, mark, 0, 1);
-    let windiag2 = diagcycles(board, boardN, howLongWantToCheck, mark, boardN - 1, -1);
-    let winRow = rowAndColcycles(board, boardN, howLongWantToCheck, mark, true);
-    let winCol = rowAndColcycles(board, boardN, howLongWantToCheck, mark, false);
-
-    let listOfGoodChoises = [windiag1, windiag2, winRow, winCol];
-
-    for (const element of listOfGoodChoises) {
-        if (element !== false) {
-            return element;
-        }
-    }
-
-    return "nope";
-}
-
-console.log(getCleverParams([
-    ["O", "O", "."],
-    [".", "O", "."],
-    [".", "O", "."]], 3, 3, "O"));
-
-console.log(getCleverParams([
-    ["O", ".", "O"],
+console.log(checkSubMatrixIsWon([
     [".", ".", "."],
-    [".", ".", "."]], 3, 3, "O"));
-
-console.log(getCleverParams([
-    ["O", ".", "."],
     [".", "O", "."],
-    [".", "O", "O"]], 3, 3, "O"));
+    [".", "O", "."]], 2, "O", 1, 1))
+
+console.log(checkBoardIsWon([
+    [".", ".", "."],
+    [".", "O", "."],
+    [".", ".", "O"]], 3, 2, "O"));
+
+console.log(aiCoordsInSubMatrix([
+    [".", ".", "."],
+    [".", "O", "O"],
+    [".", ".", "O"]], 3, "O", true, 0, 0));
+
+
+/*
+console.log(getCleverParams([
+["O", "O", "."],
+[".", "O", "."],
+[".", "O", "."]], 3, 3, "O"));
 
 console.log(getCleverParams([
-    [".", ".", "O", "O"],
-    [".", "O", "O", "."],
-    [".", "O", "O", "O"],
-    [".", ".", "O", "."]], 4, 4, "O")); */ 
-    
+["O", ".", "O"],
+[".", ".", "."],
+[".", ".", "."]], 3, 3, "O"));
+
+console.log(getCleverParams([
+["O", ".", "."],
+[".", "O", "."],
+[".", "O", "O"]], 3, 3, "O"));
+
+console.log(getCleverParams([
+[".", ".", "O", "O"],
+[".", "O", "O", "."],
+[".", "O", "O", "O"],
+[".", ".", "O", "."]], 4, 4, "O")); */
+
 
 
 
