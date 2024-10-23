@@ -1,6 +1,13 @@
 import promptSync from 'prompt-sync';
 const prompt = promptSync({ sigint: true });
 
+//ai diagCheck!!!!!!!!
+
+const alphabet = [
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 
+    'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
+  ];
+  
 function getEmptyBoard(N) {
     let emptyarray = [];
     for (let i = 0; i < N; i++) {
@@ -12,7 +19,18 @@ function getEmptyBoard(N) {
     return emptyarray;
 }
 
-function isBoardFull(board) {
+function showBoard(board, N) {
+
+    let header = "  " + alphabet.slice(0, N).join(" ");
+    console.log(header);
+
+    for (let i = 0; i < N; i++) {
+        let row = (i + 1) + " " + board[i].join(" ");
+        console.log(row);
+    }
+}
+
+function isBoardFull(board) {  // [[".", "."], [".", "."]]
     for (const row of board) {
         if (row.includes(".")) {
             return false;
@@ -68,7 +86,7 @@ function checkBoardIsWon(board, N, n, mark) {
     return false;
 }
 
-function aiCoordsInSubMatrix(board, n, mark, isRowCheck, matrixRowShift, matrixColShift) {
+function aiCoordsInSubMatrixRowCol(board, n, mark, isRowCheck, matrixRowShift, matrixColShift) {
 
     let canWinCoord;
     let choosenParams = false;
@@ -77,16 +95,20 @@ function aiCoordsInSubMatrix(board, n, mark, isRowCheck, matrixRowShift, matrixC
         let markCount = 0;
         let emptyCount = 0;
         for (let j = 0; j < n; j++) {
-            if (isRowCheck === false) {
-                let randomVariable = i;
-                i = j;
-                j = randomVariable;
+            let rowINdex;
+            let colIndex;
+            if (isRowCheck === false) {   // row board[i][j] col: board[j][i]
+                rowINdex = i;
+                colIndex = j;
+            } else {
+                rowINdex = j;
+                colIndex = i;
             }
-            if (board[i + matrixRowShift][j + matrixColShift] == mark) {
+            if (board[rowINdex + matrixRowShift][colIndex + matrixColShift] == mark) {
                 markCount++;
-            } else if (board[i + matrixRowShift][j + matrixColShift] == ".") {
+            } else if (board[rowINdex + matrixRowShift][colIndex + matrixColShift] == ".") {
                 emptyCount++;
-                canWinCoord = [i + matrixRowShift, j + matrixColShift];
+                canWinCoord = [rowINdex + matrixRowShift, colIndex + matrixColShift];
             }
         }
         if (markCount === n - 1 && emptyCount === 1) {
@@ -97,10 +119,98 @@ function aiCoordsInSubMatrix(board, n, mark, isRowCheck, matrixRowShift, matrixC
     return false;
 }
 
-console.log(checkSubMatrixIsWon([
-    [".", ".", "."],
+function aiCoordsFullBoard(board, N, n, mark) {
+    let maxRowShift = N - n + 1;
+    let maxColShift = N - n + 1;
+    let possibilities = [];
+
+    for (let i = 0; i < maxRowShift; i++) {
+        for (let j = 0; j < maxColShift; j++) {
+            if (aiCoordsInSubMatrixRowCol(board, n, mark, true, i, j) !== false) {
+                possibilities.push(aiCoordsInSubMatrixRowCol(board, n, mark, true, i, j));
+            }
+            if (aiCoordsInSubMatrixRowCol(board, n, mark, false, i, j) !== false) {
+                possibilities.push(aiCoordsInSubMatrixRowCol(board, n, mark, false, i, j));
+            }
+        }
+    }
+    let randomINdex = Math.floor(Math.random() * possibilities.length)
+    return possibilities[randomINdex];
+}
+
+function updateBoard(board, coord, mark){
+    let i=coord[0];
+    let j=coord[1];
+    if (board[i][j] === ".") {
+        board[i][j]=mark;
+    }
+    return false;
+}
+
+function makeIndexFromChar(userinput, N){
+    for (let i = 0; i < N; i++) {
+        if (alphabet[i]==userinput[0]){
+            return [userinput[1]-1, i]
+        }     
+    }
+    return false;
+}
+
+function gameFlow() {
+
+    let N = prompt("N?")
+    let n = prompt("n")
+
+    let firstPlayer;
+    let secondPlayer;
+
+    while (!(firstPlayer == "human" || firstPlayer == "ai")) {
+        firstPlayer = prompt("Who is the first player? Human, AI: ").toLowerCase();
+    }
+
+    while (!(secondPlayer == "human" || secondPlayer == "ai")) {
+        secondPlayer = prompt("Who is the second player? human, AI: ").toLowerCase();
+    }
+
+    let whoPlays=[firstPlayer, secondPlayer];
+    const playerMark = ["X", "O"];
+
+    let playerIndex = 0;
+
+    let board = getEmptyBoard(N);
+
+    showBoard(getEmptyBoard(N), N)
+
+    for (let index = 0; index < N*N; index++) { 
+        if (whoPlays[playerIndex]=="human") {
+         let humanCord =prompt("Pls Give me a coord ")
+         updateBoard(board, makeIndexFromChar(humanCord, N), playerMark[playerIndex])
+        }
+        showBoard(board, N);
+        playerIndex = (playerIndex + 1) % 2;
+    }
+
+    /*if (checkBoardIsWon(board, N, n, playerMark[playerIndex])) {
+        console.log(`${playerMark[playerIndex]} won!`);
+    }
+    if (isBoardFull(board)) {
+        console.log("Board is full, it's a tie!");
+    }*/
+}
+
+gameFlow()
+
+/*
+console.log(updateBoard([
     [".", "O", "."],
-    [".", "O", "."]], 2, "O", 1, 1))
+    ["O", "O", "."],
+    [".", ".", "."]], [1,1],  "X")); */
+/*
+console.log(getEmptyBoard(5))
+console.log(isBoardFull([
+    ["O", ".", "."],
+    [".", "O", "."],
+    [".", ".", "."]]))
 
 console.log(checkBoardIsWon([
     [".", ".", "."],
@@ -109,9 +219,9 @@ console.log(checkBoardIsWon([
 
 console.log(aiCoordsInSubMatrix([
     [".", ".", "."],
-    [".", "O", "O"],
-    [".", ".", "O"]], 3, "O", true, 0, 0));
-
+    [".", ".", "O"],
+    [".", "O", "O"]], 3, "O", false, 0, 0));
+*/
 
 /*
 console.log(getCleverParams([
