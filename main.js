@@ -4,10 +4,10 @@ const prompt = promptSync({ sigint: true });
 //ai diagCheck!!!!!!!!
 
 const alphabet = [
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
     'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
-  ];
-  
+];
+
 function getEmptyBoard(N) {
     let emptyarray = [];
     for (let i = 0; i < N; i++) {
@@ -30,7 +30,7 @@ function showBoard(board, N) {
     }
 }
 
-function isBoardFull(board) {  // [[".", "."], [".", "."]]
+function isBoardFull(board) {
     for (const row of board) {
         if (row.includes(".")) {
             return false;
@@ -134,116 +134,107 @@ function aiCoordsFullBoard(board, N, n, mark) {
             }
         }
     }
-    let randomINdex = Math.floor(Math.random() * possibilities.length)
-    return possibilities[randomINdex];
+    if (possibilities.length !== 0) {
+        let randomINdex = Math.floor(Math.random() * possibilities.length);
+        return possibilities[randomINdex];
+
+    } else {
+        return false;
+    }
+
 }
 
-function updateBoard(board, coord, mark){
-    let i=coord[0];
-    let j=coord[1];
+function randomAiCoord(board, N, mark) {
+    let randomCoord;
+    do {
+        randomCoord = [Math.floor(Math.random() * N), Math.floor(Math.random() * N)];
+    } while (updateBoard(board, randomCoord, mark) == false);
+    return randomCoord;
+}
+
+function updateBoard(board, coord, mark) {
+    let i = coord[0];
+    let j = coord[1];
     if (board[i][j] === ".") {
-        board[i][j]=mark;
+        board[i][j] = mark;
+        return true;
     }
     return false;
 }
 
-function makeIndexFromChar(userinput, N){
+function makeIndexFromChar(userinput, N) {
     for (let i = 0; i < N; i++) {
-        if (alphabet[i]==userinput[0]){
-            return [userinput[1]-1, i]
-        }     
+        if (alphabet[i] == userinput[0]) {
+            return [userinput[1] - 1, i]
+        }
     }
     return false;
 }
 
 function gameFlow() {
-
-    let N = prompt("N?")
-    let n = prompt("n")
+    let N = parseInt(prompt("Board size (N): "));
+    let n = parseInt(prompt("Win condition size (n): "));
 
     let firstPlayer;
     let secondPlayer;
 
     while (!(firstPlayer == "human" || firstPlayer == "ai")) {
-        firstPlayer = prompt("Who is the first player? Human, AI: ").toLowerCase();
+        firstPlayer = prompt("Who is the first player? (human/ai): ").toLowerCase();
     }
 
     while (!(secondPlayer == "human" || secondPlayer == "ai")) {
-        secondPlayer = prompt("Who is the second player? human, AI: ").toLowerCase();
+        secondPlayer = prompt("Who is the second player? (human/ai): ").toLowerCase();
     }
 
-    let whoPlays=[firstPlayer, secondPlayer];
+    let whoPlays = [firstPlayer, secondPlayer];
     const playerMark = ["X", "O"];
 
     let playerIndex = 0;
 
     let board = getEmptyBoard(N);
+    showBoard(board, N);
 
-    showBoard(getEmptyBoard(N), N)
+    while (!isBoardFull(board)) {
+        console.log(`Player ${playerMark[playerIndex]}'s turn!`);
 
-    for (let index = 0; index < N*N; index++) { 
-        if (whoPlays[playerIndex]=="human") {
-         let humanCord =prompt("Pls Give me a coord ")
-         updateBoard(board, makeIndexFromChar(humanCord, N), playerMark[playerIndex])
+        if (whoPlays[playerIndex] == "human") {
+            let humanCoord;
+            let coord;
+            do {
+                humanCoord = prompt("Enter coordinates: ");
+                coord = makeIndexFromChar(humanCoord, N);
+            } while (!coord || !updateBoard(board, coord, playerMark[playerIndex]));
+        } else {
+            let aiCoord = aiCoordsFullBoard(board, N, n, playerMark[playerIndex]);
+            let preventAiCoord = aiCoordsFullBoard(board, N, n, playerMark[(playerIndex + 1) % 2]);
+            let randomCoord = randomAiCoord(board, N, playerMark[playerIndex]);
+
+            let chosenCoord;
+
+            if (aiCoord) {
+                chosenCoord = aiCoord;  // AI győzelmi lépése
+            } else if (preventAiCoord) {
+                chosenCoord = preventAiCoord;  // AI védekezési lépése
+            } else {
+                chosenCoord = randomCoord;  // AI véletlenszerű lépése
+            }
+            
+            updateBoard(board, chosenCoord, playerMark[playerIndex]);
+
         }
         showBoard(board, N);
+
+        if (checkBoardIsWon(board, N, n, playerMark[playerIndex])) {
+            console.log(`${playerMark[playerIndex]} won!`);
+            return;
+        }
         playerIndex = (playerIndex + 1) % 2;
     }
 
-    /*if (checkBoardIsWon(board, N, n, playerMark[playerIndex])) {
-        console.log(`${playerMark[playerIndex]} won!`);
-    }
-    if (isBoardFull(board)) {
-        console.log("Board is full, it's a tie!");
-    }*/
+    console.log("It's a tie! The board is full.");
 }
-
 gameFlow()
 
-/*
-console.log(updateBoard([
-    [".", "O", "."],
-    ["O", "O", "."],
-    [".", ".", "."]], [1,1],  "X")); */
-/*
-console.log(getEmptyBoard(5))
-console.log(isBoardFull([
-    ["O", ".", "."],
-    [".", "O", "."],
-    [".", ".", "."]]))
-
-console.log(checkBoardIsWon([
-    [".", ".", "."],
-    [".", "O", "."],
-    [".", ".", "O"]], 3, 2, "O"));
-
-console.log(aiCoordsInSubMatrix([
-    [".", ".", "."],
-    [".", ".", "O"],
-    [".", "O", "O"]], 3, "O", false, 0, 0));
-*/
-
-/*
-console.log(getCleverParams([
-["O", "O", "."],
-[".", "O", "."],
-[".", "O", "."]], 3, 3, "O"));
-
-console.log(getCleverParams([
-["O", ".", "O"],
-[".", ".", "."],
-[".", ".", "."]], 3, 3, "O"));
-
-console.log(getCleverParams([
-["O", ".", "."],
-[".", "O", "."],
-[".", "O", "O"]], 3, 3, "O"));
-
-console.log(getCleverParams([
-[".", ".", "O", "O"],
-[".", "O", "O", "."],
-[".", "O", "O", "O"],
-[".", ".", "O", "."]], 4, 4, "O")); */
 
 
 
