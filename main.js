@@ -1,14 +1,15 @@
 import promptSync from 'prompt-sync';
 const prompt = promptSync({ sigint: true });
 
-//ai diagCheck!!!!!!!!
+//ai diagCheck!!!!!!!! -----> OK
+//+ userinput validation
 
 const alphabet = [
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
     'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
 ];
 
-function getEmptyBoard(N) {
+function getEmptyBoard(N) { //OK
     let emptyarray = [];
     for (let i = 0; i < N; i++) {
         emptyarray.push([]);
@@ -18,8 +19,10 @@ function getEmptyBoard(N) {
     }
     return emptyarray;
 }
+//console.log(getEmptyBoard(5));
 
-function showBoard(board, N) {
+
+function showBoard(board, N) { //OK
 
     let header = "  " + alphabet.slice(0, N).join(" ");
     console.log(header);
@@ -29,8 +32,10 @@ function showBoard(board, N) {
         console.log(row);
     }
 }
+//showBoard(getEmptyBoard(5), 5)
 
-function isBoardFull(board) {
+
+function isBoardFull(board) { //OK
     for (const row of board) {
         if (row.includes(".")) {
             return false;
@@ -38,8 +43,10 @@ function isBoardFull(board) {
     }
     return true;
 }
+//console.log(isBoardFull([["X", ".", "X"], ["X", "X", "X"], ["X", "X", "X"]]))
 
-function checkSubMatrixIsWon(board, n, mark, matrixRowShift, matrixColShift) {
+
+function checkSubMatrixIsWon(board, n, mark, matrixRowShift, matrixColShift) { //OK
     // Check rows and columns
     for (let i = 0; i < n; i++) {
         let rowMarkCount = 0;
@@ -72,8 +79,10 @@ function checkSubMatrixIsWon(board, n, mark, matrixRowShift, matrixColShift) {
     }
     return false;
 }
+//console.log(checkSubMatrixIsWon([["X", ".", "O"], [".", ".", "O"], [".", "X", "X"]], 2, "X", 1, 1))
 
-function checkBoardIsWon(board, N, n, mark) {
+
+function checkBoardIsWon(board, N, n, mark) { //OK
     let maxRowShift = N - n + 1;
     let maxColShift = N - n + 1;
     for (let i = 0; i < maxRowShift; i++) {
@@ -85,8 +94,10 @@ function checkBoardIsWon(board, N, n, mark) {
     }
     return false;
 }
+//console.log(checkBoardIsWon([["X", "X", ""], [".", ".", "."], [".", ".", "."]], 3, 2, "X"))
 
-function aiCoordsInSubMatrixRowCol(board, n, mark, isRowCheck, matrixRowShift, matrixColShift) {
+
+function aiCoordsInSubMatrixRowCol(board, n, mark, isRowCheck, matrixRowShift, matrixColShift) { //OK
 
     let canWinCoord;
     let choosenParams = false;
@@ -118,6 +129,56 @@ function aiCoordsInSubMatrixRowCol(board, n, mark, isRowCheck, matrixRowShift, m
     }
     return false;
 }
+//console.log(aiCoordsInSubMatrixRowCol([["X", "X", "."], [".", "X", "."], [".", ".", "."]], 3, "X", false, 0, 0))
+
+
+function aiCoordsInSubMatrixDiag1(board, n, mark, matrixRowShift, matrixColShift) { //OK
+    let canWinCoord;
+    let choosenParams = false;
+
+    let markCount = 0;
+    let emptyCount = 0;
+    for (let i = 0; i < n; i++) {
+        if (board[i + matrixRowShift][i + matrixColShift] == mark) {
+            markCount++;
+        } else if (board[i + matrixRowShift][i + matrixColShift] == ".") {
+            emptyCount++
+            canWinCoord = [i + matrixRowShift, i + matrixColShift];
+        }
+    }
+    if (markCount === n - 1 && emptyCount === 1) {
+        choosenParams = canWinCoord;
+        return choosenParams;
+    }
+    return false;
+}
+//console.log(aiCoordsInSubMatrixDiag1([["X", ".", "."], [".", "X", "."], [".", ".", "."]], 3, "X", 0, 0))
+
+
+function aiCoordsInSubMatrixDiag2(board, n, mark, matrixRowShift, matrixColShift) {
+    let canWinCoord;
+    let choosenParams = false;
+    let markCount = 0;
+    let emptyCount = 0;
+
+    for (let i = 0; i < n; i++) {
+        if (board[i + matrixRowShift][n - i - 1 + matrixColShift] == mark) {
+            markCount++;
+        } else if (board[i + matrixRowShift][n - i - 1 + matrixColShift] == ".") {
+            emptyCount++
+            canWinCoord = [i + matrixRowShift, n - i - 1 + matrixColShift];
+        }
+    }
+
+    if (markCount === n - 1 && emptyCount === 1) {
+        choosenParams = canWinCoord;
+        return choosenParams;
+    }
+
+    return false;
+}
+//console.log(aiCoordsInSubMatrixDiag2([[".", ".", "X"], [".", "X", "."], [".", ".", "."]], 3, "X", 0, 0))
+
 
 function aiCoordsFullBoard(board, N, n, mark) {
     let maxRowShift = N - n + 1;
@@ -132,8 +193,15 @@ function aiCoordsFullBoard(board, N, n, mark) {
             if (aiCoordsInSubMatrixRowCol(board, n, mark, false, i, j) !== false) {
                 possibilities.push(aiCoordsInSubMatrixRowCol(board, n, mark, false, i, j));
             }
+            if (aiCoordsInSubMatrixDiag1(board, n, mark, i, j) !== false) {
+                possibilities.push(aiCoordsInSubMatrixDiag1(board, n, mark, i, j));
+            }
+            if (aiCoordsInSubMatrixDiag2(board, n, mark, i, j) !== false) {
+                possibilities.push(aiCoordsInSubMatrixDiag2(board, n, mark, i, j));
+            }
         }
     }
+
     if (possibilities.length !== 0) {
         let randomINdex = Math.floor(Math.random() * possibilities.length);
         return possibilities[randomINdex];
@@ -141,8 +209,9 @@ function aiCoordsFullBoard(board, N, n, mark) {
     } else {
         return false;
     }
-
 }
+//console.log(aiCoordsFullBoard([["X", "X", "."],[".", "X", "."],[".", ".", "."]], 3, 3, "X"))
+
 
 function randomAiCoord(board, N, mark) {
     let randomCoord;
@@ -151,6 +220,7 @@ function randomAiCoord(board, N, mark) {
     } while (updateBoard(board, randomCoord, mark) == false);
     return randomCoord;
 }
+//console.log(randomAiCoord([[".", "X", "X"],["X", "X", "X"], ["X", "X", "X"]], 3, "X"));
 
 function updateBoard(board, coord, mark) {
     let i = coord[0];
@@ -170,8 +240,9 @@ function makeIndexFromChar(userinput, N) {
     }
     return false;
 }
+//console.log(makeIndexFromChar("D3", 6))
 
-function gameFlow() {
+function thisIsPureHapinessss() {
     let N = parseInt(prompt("Board size (N): "));
     let n = parseInt(prompt("Win condition size (n): "));
 
@@ -204,6 +275,7 @@ function gameFlow() {
                 humanCoord = prompt("Enter coordinates: ");
                 coord = makeIndexFromChar(humanCoord, N);
             } while (!coord || !updateBoard(board, coord, playerMark[playerIndex]));
+            console.clear();
         } else {
             let aiCoord = aiCoordsFullBoard(board, N, n, playerMark[playerIndex]);
             let preventAiCoord = aiCoordsFullBoard(board, N, n, playerMark[(playerIndex + 1) % 2]);
@@ -218,7 +290,7 @@ function gameFlow() {
             } else {
                 chosenCoord = randomCoord;  // AI véletlenszerű lépése
             }
-            
+            console.clear();
             updateBoard(board, chosenCoord, playerMark[playerIndex]);
 
         }
@@ -230,10 +302,10 @@ function gameFlow() {
         }
         playerIndex = (playerIndex + 1) % 2;
     }
-
     console.log("It's a tie! The board is full.");
 }
-gameFlow()
+
+thisIsPureHapinessss()
 
 
 
