@@ -2,7 +2,9 @@ import promptSync from 'prompt-sync';
 const prompt = promptSync({ sigint: true });
 
 //ai diagCheck!!!!!!!! -----> OK
-//+ userinput validation
+//TO DO: USERINPUT VALIDATION
+//AI choose 2 options when it can prevent a winnig position --->  DONE!
+
 
 const alphabet = [
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
@@ -129,7 +131,10 @@ function aiCoordsInSubMatrixRowCol(board, n, mark, isRowCheck, matrixRowShift, m
     }
     return false;
 }
-//console.log(aiCoordsInSubMatrixRowCol([["X", "X", "."], [".", "X", "."], [".", ".", "."]], 3, "X", false, 0, 0))
+//console.log(aiCoordsInSubMatrixRowCol([     ["X", ".", ".", "."], 
+                                            //[".", ".", ".", "X"],
+                                           // [".", ".", ".", "X"], 
+                                            //[".", ".", ".", "."]], 3, "X", true, 1, 1))
 
 
 function aiCoordsInSubMatrixDiag1(board, n, mark, matrixRowShift, matrixColShift) { //OK
@@ -277,27 +282,24 @@ function thisIsPureHapinessss() {
             } while (!coord || !updateBoard(board, coord, playerMark[playerIndex]));
             console.clear();
         } else {
-            let aiCoord = aiCoordsFullBoard(board, N, n, playerMark[playerIndex]);
-            let preventAiCoord = aiCoordsFullBoard(board, N, n, playerMark[(playerIndex + 1) % 2]);
-            let randomCoord = randomAiCoord(board, N, playerMark[playerIndex]);
+            let chosenCoord = aiCoordsFullBoard(board, N, n, playerMark[playerIndex]);
 
-            let chosenCoord;
-
-            if (aiCoord) {
-                chosenCoord = aiCoord;  // AI győzelmi lépése
-            } else if (preventAiCoord) {
-                chosenCoord = preventAiCoord;  // AI védekezési lépése
-            } else {
-                chosenCoord = randomCoord;  // AI véletlenszerű lépése
+            if (!chosenCoord) {
+                chosenCoord = aiCoordsFullBoard(board, N, n, playerMark[(playerIndex + 1) % 2]);
             }
-            console.clear();
-            updateBoard(board, chosenCoord, playerMark[playerIndex]);
 
+            if (!chosenCoord) {
+                chosenCoord = randomAiCoord(board, N, playerMark[playerIndex]);
+            }
+            
+            updateBoard(board, chosenCoord, playerMark[playerIndex]);
+            console.clear();
         }
         showBoard(board, N);
 
         if (checkBoardIsWon(board, N, n, playerMark[playerIndex])) {
             console.log(`${playerMark[playerIndex]} won!`);
+            console.log("wow.")
             return;
         }
         playerIndex = (playerIndex + 1) % 2;
